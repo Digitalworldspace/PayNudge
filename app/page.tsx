@@ -67,6 +67,8 @@ export default function Home() {
         <span>© {new Date().getFullYear()} PayNudge</span>
         <a href="/privacy">Privacy</a>
         <a href="/terms">Terms</a>
+        <a href="/refund">Refunds</a>
+        <a href="/contact">Contact</a>
       </footer>
     </div>
   );

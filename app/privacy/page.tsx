@@ -1,6 +1,7 @@
+import { OWNER_NAME, SUPPORT_EMAIL } from "@/lib/site";
+
 export const metadata = { title: "Privacy – PayNudge" };
 
-// Starter policy. Have it reviewed before you grow; replace [Your name] and [contact email].
 export default function Privacy() {
   return (
     <div className="wrap">
@@ -8,7 +9,7 @@ export default function Privacy() {
       <article className="prose">
         <h1>Privacy policy</h1>
         <p className="muted">Last updated: October 2026</p>
-        <p>PayNudge is operated by [Your name] (&ldquo;we&rdquo;). This page explains what we collect and why.</p>
+        <p>PayNudge is operated by {OWNER_NAME} (&ldquo;we&rdquo;). This page explains what we collect and why.</p>
         <h2>What we collect</h2>
         <ul>
           <li>Your account email, name, business name and payment link.</li>
@@ -21,9 +22,9 @@ export default function Privacy() {
         <h2>Service providers</h2>
         <p>We use Supabase (database and sign-in), Vercel (hosting), Resend (sending email) and Dodo Payments (billing). They process data on our behalf under their own security and privacy terms.</p>
         <h2>Your choices</h2>
-        <p>You can edit or delete any invoice at any time. To delete your account and all its data, email [contact email] and we will do it within 30 days.</p>
+        <p>You can edit or delete any invoice at any time. To delete your account and all its data, email {SUPPORT_EMAIL} and we will do it within 30 days.</p>
         <h2>Contact</h2>
-        <p>[contact email]</p>
+        <p><a href={`mailto:${SUPPORT_EMAIL}`}>{SUPPORT_EMAIL}</a></p>
       </article>
     </div>
   );

@@ -34,6 +34,17 @@ test("balance subtracts the deposit and never goes negative", () => {
   assert.equal(balance({ amount: 100, deposit: 500 }), 0);
 });
 
+test("final reminder makes no collection threats", () => {
+  const e = buildEmail(
+    { invoice_number: "INV-9", contact_name: "", amount: 500, deposit: 0, due_date: "2026-09-01" },
+    "final",
+    { full_name: "Alex", business_name: "", payment_link: "https://pay.example" },
+    today,
+  );
+  assert.doesNotMatch(e.body, /collection|legal|lawsuit|court|agency/i);
+  assert.match(e.subject, /^Alex: final reminder for invoice INV-9$/);
+});
+
 test("suggested tone for the composer", () => {
   assert.equal(suggestedStage(-2), "upcoming");
   assert.equal(suggestedStage(3), "friendly");
@@ -48,7 +59,8 @@ test("email shows the balance and the deposit note", () => {
     { full_name: "Alex", business_name: "Alex Studio", payment_link: "https://pay.example/alex" },
     today,
   );
-  assert.match(e.subject, /28 days past due/);
+  assert.match(e.subject, /^Alex Studio: invoice INV-7 is 28 days past due$/);
+  assert.match(e.body, /payment reminder from Alex Studio about invoice INV-7/);
   assert.match(e.body, /\$600/);
   assert.match(e.body, /\$400 deposit/);
   assert.match(e.body, /https:\/\/pay\.example\/alex/);

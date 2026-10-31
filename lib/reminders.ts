@@ -110,27 +110,32 @@ export function buildEmail(
   const inDays = (n: number) => prettyDate(isoDay(utcDay(today) + n * DAY));
   const sign = `\n\nThanks,\n${name}${biz ? "\n" + biz : ""}`;
   const num = inv.invoice_number;
+  // Who the reminder is from, stated up front so the client never mistakes it for a third party.
+  const from = biz || (me.full_name?.trim() ?? "");
+  const prefix = from ? `${from}: ` : "";
+  const intro = `This is a payment reminder from ${from || name} about invoice ${num}.`;
+  const paidNote = `\n\nIf you've already paid, thank you, and please reply to let me know so I can update my records.`;
 
   switch (stage) {
     case "upcoming":
       return {
-        subject: `Upcoming: invoice ${num} due ${due}`,
-        body: `Hi ${hi},\n\nJust a quick heads-up that invoice ${num} for ${amt}${depositNote} is due on ${due}.\n\nYou can pay here: ${link}\n\nLet me know if you need anything from me before then.${sign}`,
+        subject: `${prefix}invoice ${num} due ${due}`,
+        body: `Hi ${hi},\n\n${intro} Just a quick heads-up that it's for ${amt}${depositNote} and is due on ${due}.\n\nYou can pay here: ${link}\n\nLet me know if you need anything from me before then.${sign}`,
       };
     case "friendly":
       return {
-        subject: `Friendly reminder: invoice ${num}`,
-        body: `Hi ${hi},\n\nI hope things are going well. I wanted to check in on invoice ${num} for ${amt}${depositNote}, which was due on ${due}. It may have slipped through the cracks, so here is the payment link again:\n\n${link}\n\nIf it's already on its way, please ignore this note.${sign}`,
+        subject: `${prefix}friendly reminder for invoice ${num}`,
+        body: `Hi ${hi},\n\n${intro} I hope things are going well. The invoice is for ${amt}${depositNote} and was due on ${due}. It may have slipped through the cracks, so here is the payment link again:\n\n${link}${paidNote}${sign}`,
       };
     case "firm":
       return {
-        subject: `Invoice ${num} is ${late} days past due`,
-        body: `Hi ${hi},\n\nInvoice ${num} for ${amt}${depositNote} is now ${late} days past its due date of ${due}, and I haven't received payment yet.\n\nPlease pay by ${inDays(7)} using this link:\n${link}\n\nIf there's a problem with the invoice or you need a payment plan, reply and let me know so we can sort it out.${sign}`,
+        subject: `${prefix}invoice ${num} is ${late} days past due`,
+        body: `Hi ${hi},\n\n${intro} It is for ${amt}${depositNote} and is now ${late} days past its due date of ${due}, and I haven't received payment yet.\n\nPlease pay by ${inDays(7)} using this link:\n${link}\n\nIf there's a problem with the invoice or you need a payment plan, reply and let me know so we can sort it out.${paidNote}${sign}`,
       };
     case "final":
       return {
-        subject: `Final notice: invoice ${num} (${late} days overdue)`,
-        body: `Hi ${hi},\n\nThis is a final notice for invoice ${num} for ${amt}${depositNote}, originally due on ${due}. It is now ${late} days overdue, and my earlier reminders have not received a response.\n\nPlease pay the full balance by ${inDays(5)}:\n${link}\n\nIf payment isn't received by then, I'll have to pause any ongoing work and consider next steps for collection. I'd much rather resolve this directly, so please reply if something is holding this up.${sign}`,
+        subject: `${prefix}final reminder for invoice ${num}`,
+        body: `Hi ${hi},\n\n${intro} This is my final reminder: the invoice is for ${amt}${depositNote}, was due on ${due}, and is now ${late} days overdue. I haven't heard back about my earlier reminders.\n\nPlease pay the balance by ${inDays(5)}:\n${link}\n\nUntil this is settled I'll need to pause any ongoing work. I'd much rather resolve it together, so if something is holding this up, just reply and we can work out a plan.${paidNote}${sign}`,
       };
   }
 }
