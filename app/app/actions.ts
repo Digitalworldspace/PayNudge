@@ -68,7 +68,8 @@ export async function updateInvoice(
   id: string,
   patch: Partial<{ paid: boolean; auto_remind: boolean; deposit: number; client_email: string }>,
 ): Promise<ActionResult> {
-  const { supabase } = await requireUser();
+  const { supabase, ok } = await requireAccess();
+  if (!ok) return NOPE;
   const clean: Record<string, unknown> = {};
   if (typeof patch.paid === "boolean") {
     clean.paid = patch.paid;
@@ -88,7 +89,8 @@ export async function updateInvoice(
 }
 
 export async function deleteInvoice(id: string): Promise<ActionResult> {
-  const { supabase } = await requireUser();
+  const { supabase, ok } = await requireAccess();
+  if (!ok) return NOPE;
   const { error } = await supabase.from("invoices").delete().eq("id", id);
   if (error) return { ok: false, error: error.message };
   revalidatePath("/app");
@@ -101,7 +103,8 @@ export async function saveSettings(input: {
   payment_link: string;
   auto_send: boolean;
 }): Promise<ActionResult> {
-  const { supabase, user } = await requireUser();
+  const { supabase, user, ok } = await requireAccess();
+  if (!ok) return NOPE;
   const link = input.payment_link.trim();
   if (link && !/^https?:\/\//i.test(link)) return { ok: false, error: "The payment link should start with https://" };
   const { error } = await supabase

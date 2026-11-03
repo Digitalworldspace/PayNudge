@@ -145,8 +145,8 @@ export default function Dashboard({
             })}
           </div>
 
-          <AddInvoice disabled={!canSend || pending} onAdd={(v) => run(() => addInvoice(v))} />
-          <Settings profile={profile} busy={pending} onSave={(v) => run(() => saveSettings(v))} />
+          <AddInvoice locked={!canSend} busy={pending} onAdd={(v) => run(() => addInvoice(v))} />
+          <Settings profile={profile} locked={!canSend} busy={pending} onSave={(v) => run(() => saveSettings(v))} />
         </section>
 
         <section className="panel" aria-labelledby="hMsg">
@@ -174,21 +174,32 @@ export default function Dashboard({
   );
 }
 
-function AddInvoice({ disabled, onAdd }: { disabled: boolean; onAdd: (v: Parameters<typeof addInvoice>[0]) => void }) {
+function AddInvoice({
+  locked,
+  busy,
+  onAdd,
+}: {
+  locked: boolean;
+  busy: boolean;
+  onAdd: (v: Parameters<typeof addInvoice>[0]) => void;
+}) {
   const blank = { client_name: "", contact_name: "", client_email: "", invoice_number: "", amount: "", deposit: "", due_date: todayIso() };
   const [f, setF] = useState(blank);
   const set = (k: keyof typeof blank) => (e: React.ChangeEvent<HTMLInputElement>) => setF({ ...f, [k]: e.target.value });
   return (
     <details>
       <summary>Add an invoice</summary>
+      {locked && <LockedNote />}
       <form
         className="form"
         onSubmit={(e) => {
           e.preventDefault();
+          if (locked) return;
           onAdd({ ...f, amount: parseFloat(f.amount) || 0, deposit: parseFloat(f.deposit) || 0 });
           setF(blank);
         }}
       >
+        <fieldset className="lockable" disabled={locked}>
         <div className="field"><label className="label" htmlFor="fClient">Client</label><input id="fClient" required value={f.client_name} onChange={set("client_name")} placeholder="Maple Dental" /></div>
         <div className="field"><label className="label" htmlFor="fContact">Contact name</label><input id="fContact" value={f.contact_name} onChange={set("contact_name")} placeholder="Dr. Patel" /></div>
         <div className="field"><label className="label" htmlFor="fEmail">Client email</label><input id="fEmail" type="email" value={f.client_email} onChange={set("client_email")} placeholder="billing@mapledental.com" /></div>
@@ -196,7 +207,8 @@ function AddInvoice({ disabled, onAdd }: { disabled: boolean; onAdd: (v: Paramet
         <div className="field"><label className="label" htmlFor="fAmt">Amount (USD)</label><input id="fAmt" type="number" min="0" step="0.01" required value={f.amount} onChange={set("amount")} placeholder="850" /></div>
         <div className="field"><label className="label" htmlFor="fDep">Deposit received</label><input id="fDep" type="number" min="0" step="0.01" value={f.deposit} onChange={set("deposit")} placeholder="0" /></div>
         <div className="field"><label className="label" htmlFor="fDue">Due date</label><input id="fDue" type="date" required value={f.due_date} onChange={set("due_date")} /></div>
-        <div className="field end"><button className="primary" type="submit" disabled={disabled}>Add invoice</button></div>
+        <div className="field end"><button className="primary" type="submit" disabled={locked || busy}>Add invoice</button></div>
+        </fieldset>
       </form>
     </details>
   );
@@ -204,10 +216,12 @@ function AddInvoice({ disabled, onAdd }: { disabled: boolean; onAdd: (v: Paramet
 
 function Settings({
   profile,
+  locked,
   busy,
   onSave,
 }: {
   profile: ProfileRow;
+  locked: boolean;
   busy: boolean;
   onSave: (v: { full_name: string; business_name: string; payment_link: string; auto_send: boolean }) => void;
 }) {
@@ -220,13 +234,16 @@ function Settings({
   return (
     <details open={!profile.full_name}>
       <summary>Your details and automatic reminders</summary>
+      {locked && <LockedNote />}
       <form
         className="form"
         onSubmit={(e) => {
           e.preventDefault();
+          if (locked) return;
           onSave(f);
         }}
       >
+        <fieldset className="lockable" disabled={locked}>
         <div className="field"><label className="label" htmlFor="bName">Your name</label><input id="bName" value={f.full_name} onChange={(e) => setF({ ...f, full_name: e.target.value })} placeholder="Alex Morgan" /></div>
         <div className="field"><label className="label" htmlFor="bBiz">Business</label><input id="bBiz" value={f.business_name} onChange={(e) => setF({ ...f, business_name: e.target.value })} placeholder="Morgan Web Studio" /></div>
         <div className="field wide"><label className="label" htmlFor="bLink">Payment link</label><input id="bLink" value={f.payment_link} onChange={(e) => setF({ ...f, payment_link: e.target.value })} placeholder="https://paypal.me/yourname" /></div>
@@ -236,7 +253,8 @@ function Settings({
             <b>Send reminders automatically.</b> Once a day, PayNudge emails clients 3 days before the due date, then 1, 10 and 30 days late. Replies come straight to your inbox.
           </span>
         </label>
-        <div className="field end"><button className="primary" type="submit" disabled={busy}>Save</button></div>
+        <div className="field end"><button className="primary" type="submit" disabled={locked || busy}>Save</button></div>
+        </fieldset>
       </form>
     </details>
   );
@@ -294,6 +312,8 @@ function Composer({
 
   return (
     <div className="composer">
+      {!canSend && <LockedNote />}
+      <fieldset className="lockable composer" disabled={!canSend}>
       <div className="tones" role="group" aria-label="Tone">
         {STAGE_ORDER.map((s) => (
           <button key={s} type="button" aria-pressed={s === stage} onClick={() => pick(s)}>
@@ -347,6 +367,15 @@ function Composer({
         <input id="mAuto" type="checkbox" checked={inv.auto_remind} onChange={(e) => onAuto(e.target.checked)} disabled={busy} />
         <span>Include this invoice in automatic reminders{profile.auto_send ? "" : " (automatic reminders are off in your settings)"}</span>
       </label>
+      </fieldset>
     </div>
+  );
+}
+
+function LockedNote() {
+  return (
+    <p className="locked-note">
+      Your free trial has ended. Subscribe to edit invoices and send reminders. Your data is safe.
+    </p>
   );
 }

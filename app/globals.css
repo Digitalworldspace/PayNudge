@@ -100,3 +100,9 @@ details summary { cursor: pointer; font-weight: 600; }
 .prose { max-width: 68ch; }
 .prose h2 { margin-top: 1.4em; }
 footer { color: var(--muted); font-size: 0.85rem; display: flex; gap: 16px; flex-wrap: wrap; border-top: 1px solid var(--line); padding-top: 16px; }
+
+/* Locked after the trial ends */
+fieldset.lockable { border: 0; padding: 0; margin: 0; min-width: 0; display: contents; }
+fieldset.lockable.composer { display: grid; gap: 12px; }
+fieldset.lockable:disabled input, fieldset.lockable:disabled textarea, fieldset.lockable:disabled button { opacity: 0.55; cursor: not-allowed; }
+.locked-note { margin: 8px 0 0; padding: 8px 12px; border-radius: 8px; background: var(--warn-bg); color: var(--warn); font-size: 0.85rem; }
