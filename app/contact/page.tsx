@@ -1,4 +1,4 @@
-import { OWNER_NAME, SUPPORT_EMAIL } from "@/lib/site";
+import { OPERATOR_LINE, SUPPORT_EMAIL } from "@/lib/site";
 
 export const metadata = { title: "Contact – PayNudge" };
 
@@ -9,7 +9,7 @@ export default function Contact() {
       <article className="prose">
         <h1>Contact</h1>
         <p>Questions, billing help, or feedback: email <a href={`mailto:${SUPPORT_EMAIL}`}>{SUPPORT_EMAIL}</a>. We reply within 1–2 business days.</p>
-        <p>PayNudge is operated by {OWNER_NAME}, India.</p>
+        <p>{OPERATOR_LINE}, based in India.</p>
         <p className="muted">Received a reminder email sent with PayNudge? It came from the business named in the email, and replying to it reaches them directly. PayNudge is a reminder tool, not a collection agency, and has no information about your invoice.</p>
       </article>
     </div>

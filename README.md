@@ -2,12 +2,14 @@
 
 Automatic, escalating invoice reminders for freelancers and small businesses.
 
-Stack: Next.js 15 (Vercel) · Supabase (auth + Postgres with row-level security) · Resend (email) · Dodo Payments (subscriptions, merchant of record).
+Stack: Next.js 15 (Vercel) · Supabase (auth + Postgres with row-level security) · Resend (email) · Polar or Dodo Payments (subscriptions, merchant of record; picked by PAYMENT_PROVIDER).
 
 ## Setup
 1. Supabase: create a project, run `supabase/schema.sql` in the SQL Editor. Auth > URL Configuration: set Site URL to your site and add `https://YOUR-SITE/auth/callback` to Redirect URLs.
 2. Resend: verify a sending domain, create an API key.
-3. Dodo Payments: create a monthly subscription product, an API key, and a webhook pointing to `https://YOUR-SITE/api/webhooks/dodo` (subscription events).
+3. Payments, one of:
+   - Polar: create a monthly subscription product, an organization access token, and a webhook to `https://YOUR-SITE/api/webhooks/polar` (all `subscription.*` events). Set POLAR_* variables.
+   - Dodo Payments: create a monthly subscription product, an API key, and a webhook to `https://YOUR-SITE/api/webhooks/dodo` (subscription events). Set DODO_* variables and PAYMENT_PROVIDER=dodo.
 4. Vercel: import the repo, add every variable from `.env.example`, deploy. `vercel.json` runs `/api/cron/reminders` daily at 14:00 UTC (morning in the US).
 
 ## Reminder schedule

@@ -1,4 +1,5 @@
 import { SUPPORT_EMAIL } from "@/lib/site";
+import { providerName } from "@/lib/billing";
 
 export const metadata = { title: "Refund policy – PayNudge" };
 
@@ -13,7 +14,7 @@ export default function Refund() {
         <h2>Cancelling</h2>
         <p>You can cancel your subscription at any time from the Billing page in the app. You won&apos;t be charged again, and you keep access until the end of the period you already paid for.</p>
         <h2>Refunds</h2>
-        <p>If you were charged by mistake or PayNudge didn&apos;t work for you, email <a href={`mailto:${SUPPORT_EMAIL}`}>{SUPPORT_EMAIL}</a> within 14 days of the charge and we will refund that payment in full. Refunds are issued to the original payment method by Dodo Payments, our payment provider, and usually appear within 5–10 business days.</p>
+        <p>If you were charged by mistake or PayNudge didn&apos;t work for you, email <a href={`mailto:${SUPPORT_EMAIL}`}>{SUPPORT_EMAIL}</a> within 14 days of the charge and we will refund that payment in full. Refunds are issued to the original payment method by {providerName()}, our payment provider, and usually appear within 5–10 business days.</p>
       </article>
     </div>
   );

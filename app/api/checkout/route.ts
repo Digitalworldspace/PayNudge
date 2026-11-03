@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-import { dodo, siteUrl } from "@/lib/dodo";
+import { siteUrl } from "@/lib/dodo";
+import { createCheckoutUrl, provider } from "@/lib/billing";
 
 // Starts a subscription checkout for the signed-in user.
 export async function POST(request: Request) {
@@ -13,15 +14,15 @@ export async function POST(request: Request) {
   const { data: profile } = await supabase.from("profiles").select("full_name").eq("id", user.id).single();
 
   try {
-    const session = await dodo().checkoutSessions.create({
-      product_cart: [{ product_id: process.env.DODO_PRODUCT_ID!, quantity: 1 }],
-      customer: { email: user.email!, name: profile?.full_name || user.email! },
-      return_url: `${siteUrl(request)}/app?checkout=done`,
-      metadata: { user_id: user.id },
+    const url = await createCheckoutUrl({
+      userId: user.id,
+      email: user.email!,
+      name: profile?.full_name || user.email!,
+      returnUrl: `${siteUrl(request)}/app?checkout=done`,
     });
-    return NextResponse.redirect(session.checkout_url, 303);
+    return NextResponse.redirect(url, 303);
   } catch (e) {
-    console.error("checkout failed", e);
+    console.error(`checkout failed (${provider()})`, e);
     return NextResponse.redirect(`${siteUrl(request)}/app?checkout=error`, 303);
   }
 }
