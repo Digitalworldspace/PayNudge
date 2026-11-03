@@ -15,7 +15,10 @@ export async function sendReminder(m: OutgoingReminder): Promise<{ ok: true } | 
   if (!key || !from) return { ok: false, error: "Email sending isn't set up yet (missing RESEND_API_KEY or RESEND_FROM)." };
   const resend = new Resend(key);
   const display = (m.senderName || "PayNudge").replace(/["<>]/g, "").slice(0, 60);
-  const footer = `\n\n--\nSent on behalf of ${display} using PayNudge, an invoice reminder tool. PayNudge is not a collection agency. Reply to this email to reach ${display} directly.`;
+  const support = process.env.NEXT_PUBLIC_SUPPORT_EMAIL;
+  const footer =
+    `\n\n--\nSent on behalf of ${display} using PayNudge, an invoice reminder tool. PayNudge is not a collection agency and is not a party to this invoice. Reply to this email to reach ${display} directly.` +
+    (support ? ` If you believe this email was sent in error or is being misused, tell us at ${support}.` : "");
   const { error } = await resend.emails.send({
     from: `${display} <${from}>`,
     to: [m.to],

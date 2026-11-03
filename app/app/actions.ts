@@ -28,6 +28,8 @@ async function requireAccess() {
   return { supabase, user, profile: profile as ProfileRow, ok };
 }
 
+const MANUAL_DAILY_LIMIT = 30;
+
 const NOPE: ActionResult = { ok: false, error: "Your free trial has ended. Subscribe to keep adding and sending reminders." };
 
 export async function addInvoice(input: {
@@ -130,6 +132,28 @@ export async function sendNow(invoiceId: string, stage: Stage, subject: string, 
   if (!inv) return { ok: false, error: "Invoice not found." };
   if (!isEmail(inv.client_email)) return { ok: false, error: "Add the client's email to this invoice first." };
   if (!subject.trim() || !body.trim()) return { ok: false, error: "The subject and message can't be empty." };
+  if (inv.paid) return { ok: false, error: "This invoice is marked as paid, so no reminder can be sent." };
+
+  // Limits that keep reminders from turning into harassment.
+  const admin = createAdminClient();
+  const since = new Date(Date.now() - 24 * 3600 * 1000).toISOString();
+  const { count: forInvoice } = await admin
+    .from("reminders_sent")
+    .select("id", { count: "exact", head: true })
+    .eq("invoice_id", inv.id)
+    .gte("sent_at", since);
+  if ((forInvoice ?? 0) > 0) {
+    return { ok: false, error: "A reminder for this invoice already went out in the last 24 hours. Please wait a day before sending another." };
+  }
+  const { count: today } = await admin
+    .from("reminders_sent")
+    .select("id", { count: "exact", head: true })
+    .eq("user_id", user.id)
+    .eq("automatic", false)
+    .gte("sent_at", since);
+  if ((today ?? 0) >= MANUAL_DAILY_LIMIT) {
+    return { ok: false, error: `You've sent ${MANUAL_DAILY_LIMIT} reminders by hand in the last 24 hours, which is the daily limit. Please try again tomorrow.` };
+  }
 
   const res = await sendReminder({
     to: inv.client_email,
@@ -140,7 +164,7 @@ export async function sendNow(invoiceId: string, stage: Stage, subject: string, 
   });
   if (!res.ok) return { ok: false, error: res.error };
 
-  await createAdminClient()
+  await admin
     .from("reminders_sent")
     .insert({ invoice_id: inv.id, user_id: user.id, stage, automatic: false });
   revalidatePath("/app");

@@ -7,6 +7,9 @@ import { isEmail, sendReminder } from "@/lib/mailer";
 export const runtime = "nodejs";
 export const maxDuration = 60;
 
+// A safety cap so a mistaken import of many invoices can never flood people with email.
+const AUTO_DAILY_LIMIT_PER_ACCOUNT = 100;
+
 // Runs once a day (see vercel.json). Sends the reminder each unpaid invoice is due for.
 export async function GET(request: Request) {
   if (request.headers.get("authorization") !== `Bearer ${process.env.CRON_SECRET}`) {
@@ -32,7 +35,9 @@ export async function GET(request: Request) {
       .eq("paid", false)
       .eq("auto_remind", true);
 
+    let sentForUser = 0;
     for (const inv of invoices ?? []) {
+      if (sentForUser >= AUTO_DAILY_LIMIT_PER_ACCOUNT) break;
       if (!isEmail(inv.client_email) || balance(inv) <= 0) continue;
 
       const { data: log } = await db.from("reminders_sent").select("stage").eq("invoice_id", inv.id);
@@ -53,6 +58,7 @@ export async function GET(request: Request) {
       }
       await db.from("reminders_sent").insert({ invoice_id: inv.id, user_id: profile.id, stage, automatic: true });
       sent++;
+      sentForUser++;
     }
   }
 

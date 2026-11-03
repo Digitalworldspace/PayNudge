@@ -27,7 +27,7 @@ const faqs = [
   },
   {
     q: "Is each reminder sent more than once?",
-    a: "No. Each step of the schedule goes out once per invoice. If you already sent a firmer reminder by hand, PayNudge never goes back to a softer one.",
+    a: "No. Each step of the schedule goes out once per invoice, and at most one reminder per invoice goes out in any 24 hours, even if you click Send now. If you already sent a firmer reminder by hand, PayNudge never goes back to a softer one.",
   },
   {
     q: "I took a deposit. What does the reminder ask for?",

@@ -3,12 +3,15 @@
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/browser";
 
+const TERMS_VERSION = "2026-11-03";
+
 export default function Login() {
   const [email, setEmail] = useState("");
   const [code, setCode] = useState("");
   const [step, setStep] = useState<"email" | "code">("email");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+  const [agree, setAgree] = useState(false);
 
   useEffect(() => {
     if (new URLSearchParams(window.location.search).get("error") === "link") {
@@ -18,6 +21,10 @@ export default function Login() {
 
   async function sendCode(e: React.FormEvent) {
     e.preventDefault();
+    if (!agree) {
+      setError("Please confirm you agree to the Terms and will only send reminders for genuine business invoices.");
+      return;
+    }
     setBusy(true);
     setError("");
     const { error } = await createClient().auth.signInWithOtp({
@@ -50,6 +57,10 @@ export default function Login() {
       setError("That code didn't work. Check the newest email and enter its code, or send a new one.");
       return;
     }
+    // Keep a record of when this account accepted the Terms.
+    await createClient()
+      .auth.updateUser({ data: { terms_accepted_at: new Date().toISOString(), terms_version: TERMS_VERSION } })
+      .catch(() => undefined);
     window.location.href = "/app";
   }
 
@@ -67,7 +78,14 @@ export default function Login() {
               <label className="label" htmlFor="email">Work email</label>
               <input id="email" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@yourbusiness.com" />
             </div>
-            <button className="primary" type="submit" disabled={busy}>
+            <label className="toggle" htmlFor="agree">
+              <input id="agree" type="checkbox" checked={agree} onChange={(e) => setAgree(e.target.checked)} />
+              <span>
+                I agree to the <a href="/terms" target="_blank">Terms</a> and <a href="/privacy" target="_blank">Privacy Policy</a>, and I&apos;ll only
+                send reminders for genuine, unpaid invoices to business clients.
+              </span>
+            </label>
+            <button className="primary" type="submit" disabled={busy || !agree}>
               {busy ? "Sending…" : "Email me a sign-in code"}
             </button>
             {error && <p className="hint" style={{ color: "var(--bad)" }}>{error}</p>}
