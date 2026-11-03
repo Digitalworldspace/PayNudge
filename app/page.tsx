@@ -12,7 +12,10 @@ export default function Home() {
     <div className="wrap">
       <header className="top">
         <a href="/" className="brand">Pay<span>Nudge</span></a>
-        <a href="/login">Sign in</a>
+        <div className="top-actions">
+          <a href="/how-to-use">How to use</a>
+          <a href="/login">Sign in</a>
+        </div>
       </header>
 
       <section className="hero">
@@ -65,6 +68,7 @@ export default function Home() {
 
       <footer>
         <span>© {new Date().getFullYear()} PayNudge</span>
+        <a href="/how-to-use">How to use</a>
         <a href="/privacy">Privacy</a>
         <a href="/terms">Terms</a>
         <a href="/refund">Refunds</a>

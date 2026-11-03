@@ -106,3 +106,18 @@ fieldset.lockable { border: 0; padding: 0; margin: 0; min-width: 0; display: con
 fieldset.lockable.composer { display: grid; gap: 12px; }
 fieldset.lockable:disabled input, fieldset.lockable:disabled textarea, fieldset.lockable:disabled button { opacity: 0.55; cursor: not-allowed; }
 .locked-note { margin: 8px 0 0; padding: 8px 12px; border-radius: 8px; background: var(--warn-bg); color: var(--warn); font-size: 0.85rem; }
+
+/* How to use */
+.guide .lead { font-size: 1.1rem; color: var(--muted); }
+.steps { padding-left: 1.4rem; display: grid; gap: 18px; }
+.steps > li::marker { font-family: var(--f-display); font-weight: 800; color: var(--accent); }
+.steps h2 { font-size: 1.1rem; margin: 0 0 4px; }
+.steps p { margin: 4px 0; }
+.table-wrap { overflow-x: auto; margin-top: 8px; }
+.guide table { border-collapse: collapse; width: 100%; min-width: 480px; font-size: 0.92rem; }
+.guide th, .guide td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+.guide th { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); }
+.faq { display: grid; gap: 8px; }
+.faq details { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 10px 14px; }
+.faq p { margin: 8px 0 0; color: var(--muted); }
+.steps > li, .wrap > article, .prose { min-width: 0; }

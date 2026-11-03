@@ -41,6 +41,7 @@ export default async function AppPage({ searchParams }: { searchParams: Promise<
           Pay<span>Nudge</span>
         </a>
         <div className="top-actions">
+          <a href="/how-to-use" className="small">How to use</a>
           <span className="muted small">{user.email}</span>
           {state.kind === "subscribed" && (
             <form action="/api/portal" method="post">
